@@ -68,12 +68,21 @@ ollama list
 ## 📦 Project Structure
 
 ```
-deep-research/
-├── app.py                    # Flask backend service
+local-agent/
+├── app.py                    # Flask backend service with skills system
 ├── ollama_chat.py           # Command-line chat program
 ├── ollama_chat_simple.py    # Simple test program
 ├── templates/
-│   └── index.html           # Web interface template
+│   └── index.html           # Web interface template with dynamic parameter configuration
+├── skills/                  # Skills system directory
+│   ├── README.md            # Skills system documentation
+│   ├── list_files.md/py     # File listing skill
+│   ├── read_file.md/py      # File reading skill
+│   ├── write_file.md/py     # File writing skill
+│   ├── search_files.md/py   # File content search skill
+│   ├── execute_command.md/py # Shell command execution skill
+│   ├── tavily_search.md/py  # Real-time web search skill
+│   └── route_skill.md/py    # Intelligent skill routing skill
 ├── static/                  # Static resources (optional)
 │   ├── css/
 │   └── js/
@@ -235,20 +244,7 @@ Main API endpoints:
 
 ### Skills System Architecture
 
-The system implements a sophisticated skill-based architecture:
-
-#### Skill Directory Structure
-```
-skills/
-├── README.md              # Skill system documentation
-├── list_files.md/py       # File listing skill
-├── read_file.md/py        # File reading skill
-├── write_file.md/py       # File writing skill
-├── search_files.md/py     # File content search skill
-├── execute_command.md/py  # Shell command execution skill
-├── tavily_search.md/py    # Real-time web search skill
-└── route_skill.md/py      # Intelligent skill routing skill
-```
+The system implements a sophisticated skill-based architecture with intelligent routing:
 
 #### Skill Routing Logic
 
