@@ -1,0 +1,7 @@
+flask==2.3.3
+ollama==0.6.1
+tavily-python==0.5.4
+httpx==0.28.1
+requests==2.24.0
+tiktoken==0.7.0
+regex==2024.11.6
