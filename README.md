@@ -2,6 +2,9 @@
 
 An intelligent chat service based on Ollama, supporting local model chat and Tavily real-time search functionality.
 
+<img width="1150" height="781" alt="image" src="https://github.com/user-attachments/assets/f3603ccf-e21a-4544-ac5b-9299913d6afe" />
+
+
 ## 🚀 Features
 
 - **Multi-Model Support**: Automatically detects and supports all local Ollama models
