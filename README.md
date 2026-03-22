@@ -13,6 +13,8 @@ An intelligent chat service based on Ollama, supporting local model chat and Tav
 - **Web Interface**: Modern web chat interface, mobile-friendly
 - **Dynamic Model List**: Real-time query of available models, auto-refresh every 30 seconds
 - **Conversation History**: Complete conversation history management and clearing
+- **Intelligent Skills System**: Advanced skill-based architecture with LLM-powered routing
+- **Smart Skill Routing**: Uses LLM to analyze queries and intelligently select the most appropriate skill
 
 ## 📋 System Requirements
 
@@ -174,6 +176,32 @@ chat_client = OllamaChat(model_name="qwen3.5:2b")
    - Enter `clear` to clear conversation history
    - Enter `exit` to exit program
 
+### Intelligent Skills System
+
+The system uses LLM-powered skill routing to intelligently handle different types of queries:
+
+#### File System Operations
+- **List Files**: "List files in /home/user/documents" → `list_files` skill
+- **Read Files**: "Read the content of config.json" → `read_file` skill
+- **Write Files**: "Create a new file called notes.txt" → `write_file` skill
+- **Search Files**: "Search for TODO comments in the codebase" → `search_files` skill
+
+#### System Operations
+- **Execute Commands**: "Run 'ls -la' command" → `execute_command` skill
+- **System Info**: "Get system information" → `get_system_info` skill
+
+#### Real-time Information
+- **Latest News**: "What are the latest developments in AI?" → `tavily_search` skill
+- **Weather**: "What's the current weather in New York?" → `tavily_search` skill
+- **Stock Prices**: "What's the stock price of Apple?" → `tavily_search` skill
+
+#### Smart Routing
+The system automatically analyzes your query and selects the most appropriate skill:
+- Uses LLM to understand query intent
+- Considers conversation context
+- Provides confidence scores for skill selection
+- Falls back to keyword-based routing if needed
+
 ### Smart Search Function
 
 The system automatically determines if real-time search is needed:
@@ -202,6 +230,47 @@ Main API endpoints:
 - `POST /api/chat` - Send chat message (supports streaming response)
 - `POST /api/clear` - Clear conversation history
 - `GET /api/status` - Get current status
+- `GET /api/skills` - Get available skills list
+- `POST /api/skill/<skill_name>` - Execute specific skill
+
+### Skills System Architecture
+
+The system implements a sophisticated skill-based architecture:
+
+#### Skill Directory Structure
+```
+skills/
+├── README.md              # Skill system documentation
+├── list_files.md/py       # File listing skill
+├── read_file.md/py        # File reading skill
+├── write_file.md/py       # File writing skill
+├── search_files.md/py     # File content search skill
+├── execute_command.md/py  # Shell command execution skill
+├── tavily_search.md/py    # Real-time web search skill
+└── route_skill.md/py      # Intelligent skill routing skill
+```
+
+#### Skill Routing Logic
+
+1. **Primary Analysis**: `route_skill` uses LLM to analyze user queries
+2. **Confidence Scoring**: Each skill selection includes a confidence score (0.0-1.0)
+3. **Context Awareness**: Considers conversation history for better decisions
+4. **Fallback Mechanism**: Keyword-based routing if LLM analysis fails
+5. **Multi-skill Support**: Complex queries can trigger multiple skills sequentially
+
+#### Skill Activation Patterns
+
+**File System Skills**:
+- `list_files`: "list files", "show files", "what files", "ls ", "dir "
+- `read_file`: "read file", "show content", "cat ", "head ", "tail "
+- `write_file`: "write file", "create file", "echo ", "touch "
+- `search_files`: "search file", "find file", "grep ", "rgrep "
+
+**System Skills**:
+- `execute_command`: "run command", "execute command", "cd ", "mkdir ", "rm "
+
+**Real-time Information Skills**:
+- `tavily_search`: "latest", "recent", "current", "weather", "stock", "news"
 
 ### Frontend Tech Stack
 
@@ -217,6 +286,7 @@ Main API endpoints:
 2. **Streaming Response**: Use `stream=True` parameter for real-time output
 3. **Smart Search**: Determine search needs based on keyword and pattern matching
 4. **Context Management**: Maintain complete conversation history
+5. **Skill Execution**: Intelligent routing and execution of appropriate skills
 
 ## 🐛 Troubleshooting
 

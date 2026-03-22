@@ -75,6 +75,80 @@
             height: calc(100vh - 200px);
         }
 
+        .parameters-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .parameters-section h3 {
+            margin-bottom: 1rem;
+            color: #495057;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .parameter-group {
+            margin-bottom: 1rem;
+        }
+
+        .parameter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .parameter-group input[type="number"],
+        .parameter-group input[type="range"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .parameter-group input[type="range"] {
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .parameter-value {
+            display: inline-block;
+            margin-left: 1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .parameter-description {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .reset-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background-color: #5a6268;
+        }
+
         .model-section {
             margin-bottom: 2rem;
         }
@@ -272,6 +346,57 @@
 
     <div class="container">
         <div class="sidebar">
+            <div class="parameters-section">
+                <h3>⚙️ Model Parameters</h3>
+                
+                <div class="parameter-group">
+                    <label for="num_ctx">
+                        Context Window Size (num_ctx)
+                        <span class="parameter-value" id="num_ctx_value">4096</span>
+                    </label>
+                    <input type="range" id="num_ctx" min="512" max="8192" value="4096" step="256">
+                    <div class="parameter-description">Size of the context window for processing text (512-8192)</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label for="num_predict">
+                        Max Tokens to Generate (num_predict)
+                        <span class="parameter-value" id="num_predict_value">2048</span>
+                    </label>
+                    <input type="range" id="num_predict" min="256" max="4096" value="2048" step="256">
+                    <div class="parameter-description">Maximum number of tokens to generate in response (256-4096)</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label for="temperature">
+                        Creativity Level (temperature)
+                        <span class="parameter-value" id="temperature_value">0.7</span>
+                    </label>
+                    <input type="range" id="temperature" min="0.0" max="2.0" value="0.7" step="0.1">
+                    <div class="parameter-description">Higher values = more creative/random, Lower values = more focused/deterministic</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label for="top_p">
+                        Nucleus Sampling (top_p)
+                        <span class="parameter-value" id="top_p_value">0.9</span>
+                    </label>
+                    <input type="range" id="top_p" min="0.0" max="1.0" value="0.9" step="0.05">
+                    <div class="parameter-description">Controls diversity of output by sampling from top tokens (0.0-1.0)</div>
+                </div>
+
+                <div class="parameter-group">
+                    <label for="repeat_penalty">
+                        Repetition Penalty (repeat_penalty)
+                        <span class="parameter-value" id="repeat_penalty_value">1.1</span>
+                    </label>
+                    <input type="range" id="repeat_penalty" min="0.5" max="2.0" value="1.1" step="0.05">
+                    <div class="parameter-description">Penalty for repeating tokens (1.0 = no penalty, >1.0 = more penalty)</div>
+                </div>
+
+                <button class="reset-btn" onclick="resetParameters()">🔄 Reset to Defaults</button>
+            </div>
+
             <div class="model-section">
                 <h3>🤖 Available Models</h3>
                 <div class="model-list" id="model-list">
@@ -319,6 +444,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadModels();
             updateStatus();
+            setupParameterEvents();
             
             // Add event listener for Enter key
             document.getElementById('message-input').addEventListener('keypress', function(e) {
@@ -330,6 +456,68 @@
             // Auto-refresh models every 30 seconds
             setInterval(loadModels, 30000);
         });
+
+        // Parameter management functions
+        function setupParameterEvents() {
+            const parameters = ['num_ctx', 'num_predict', 'temperature', 'top_p', 'repeat_penalty'];
+            
+            parameters.forEach(param => {
+                const input = document.getElementById(param);
+                const valueDisplay = document.getElementById(param + '_value');
+                
+                // Update display when slider changes
+                input.addEventListener('input', function() {
+                    valueDisplay.textContent = this.value;
+                });
+                
+                // Update display on page load
+                valueDisplay.textContent = input.value;
+            });
+        }
+
+        function getParameters() {
+            return {
+                num_ctx: parseInt(document.getElementById('num_ctx').value),
+                num_predict: parseInt(document.getElementById('num_predict').value),
+                temperature: parseFloat(document.getElementById('temperature').value),
+                top_p: parseFloat(document.getElementById('top_p').value),
+                repeat_penalty: parseFloat(document.getElementById('repeat_penalty').value)
+            };
+        }
+
+        function resetParameters() {
+            document.getElementById('num_ctx').value = 4096;
+            document.getElementById('num_predict').value = 2048;
+            document.getElementById('temperature').value = 0.7;
+            document.getElementById('top_p').value = 0.9;
+            document.getElementById('repeat_penalty').value = 1.1;
+            
+            // Update displays
+            setupParameterEvents();
+        }
+
+        function saveParameters() {
+            const params = getParameters();
+            localStorage.setItem('ollama_chat_parameters', JSON.stringify(params));
+        }
+
+        function loadSavedParameters() {
+            const saved = localStorage.getItem('ollama_chat_parameters');
+            if (saved) {
+                try {
+                    const params = JSON.parse(saved);
+                    document.getElementById('num_ctx').value = params.num_ctx || 4096;
+                    document.getElementById('num_predict').value = params.num_predict || 2048;
+                    document.getElementById('temperature').value = params.temperature || 0.7;
+                    document.getElementById('top_p').value = params.top_p || 0.9;
+                    document.getElementById('repeat_penalty').value = params.repeat_penalty || 1.1;
+                } catch (e) {
+                    console.error('Error loading saved parameters:', e);
+                }
+            }
+            // Update displays
+            setupParameterEvents();
+        }
 
         async function loadModels() {
             try {
@@ -452,12 +640,18 @@
             isStreaming = true;
             
             try {
+                // Get current parameters
+                const parameters = getParameters();
+                
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ 
+                        message: message,
+                        options: parameters
+                    })
                 });
                 
                 if (!response.ok) {
