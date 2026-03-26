@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, Any, List
 import ollama
 
@@ -96,20 +97,68 @@ Rules:
 - Only suggest skills that are in the available skills list
 - Provide specific, actionable parameters
 - Confidence should reflect how certain you are about the skill choice
-- Reasoning should explain why this skill is the best match""".format(
+- Reasoning should explain why this skill is the best match
+
+IMPORTANT: Analyze the user query carefully and match it against the skill descriptions. Look for:
+- Explicit requests for specific actions (e.g., "list files", "read file", "execute command")
+- Keywords that indicate file operations (list, read, write, search, execute)
+- Commands that should be run in shell
+- Questions about current information that require web search
+- Context clues that indicate the user's intent
+
+Examples:
+- "List files in current directory" → list_files skill
+- "Read the content of config.json" → read_file skill  
+- "Execute ls -la command" → execute_command skill
+- "What's the latest news about AI?" → tavily_search skill""".format(
             skills_text=skills_text,
             user_query=user_query,
             history_context_str=history_context if history_context else "No conversation history available."
         )
         
-        # Get the current model from environment or use a default
-        # For this implementation, we'll use a simple approach since we don't have direct access to the current model
-        # In a real implementation, this would use the current model from the chat instance
+        # Try to use LLM for analysis first
+        try:
+            # Get current model from environment or use a default
+            current_model = os.getenv('OLLAMA_MODEL', 'qwen3.5:2b')
+            
+            # Call the LLM with the prompt
+            response = ollama.generate(
+                model=current_model,
+                prompt=prompt,
+                format='json',
+                options={
+                    'temperature': 0.1,  # Low temperature for more deterministic responses
+                    'num_predict': 512,   # Limit response length
+                }
+            )
+            
+            # Parse the LLM response
+            if response and 'response' in response:
+                llm_output = response['response']
+                
+                # Try to parse JSON from response
+                try:
+                    result = json.loads(llm_output)
+                    
+                    # Validate the response structure
+                    if 'selected_skill' in result and 'confidence' in result:
+                        return {
+                            "success": True,
+                            "selected_skill": result.get("selected_skill"),
+                            "confidence": result.get("confidence", 0.5),
+                            "reasoning": result.get("reasoning", "LLM-based analysis"),
+                            "parameters": result.get("parameters", {}),
+                            "message": f"LLM skill routing completed with confidence {result.get('confidence', 0.5):.2f}"
+                        }
+                except json.JSONDecodeError:
+                    # If JSON parsing fails, fall back to keyword analysis
+                    pass
+                    
+        except Exception as llm_error:
+            # If LLM call fails, fall back to keyword analysis
+            print(f"LLM analysis failed: {llm_error}")
         
-        # For now, we'll implement a simplified version that analyzes the query
-        # In a full implementation, this would call the LLM with the prompt above
-        
-        # Simple keyword-based fallback for demonstration
+        # Fallback to keyword-based analysis
         query_lower = user_query.lower().strip()
         
         # Analyze query for skill matching
